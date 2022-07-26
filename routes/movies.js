@@ -3,6 +3,7 @@ const router = Router();
 
 const movieData = require('../dataInterface/movies');
 
+
 // curl http://localhost:5000/movies
 router.get("/", async (req, res, next) => {
   let movieList = await movieData.getAll()
@@ -31,6 +32,24 @@ router.get("/:id", async (req, res, next) => {
 
 });
 
+router.get("/:movieId/comments/:commentId", async (req, res, next) => {
+  const result = await movieData.getCommentById(req.params.commentId)
+  if(result.error){
+    resultStatus = 404;
+  } else {
+    resultStatus = 200;
+  }
+
+  res.status(resultStatus).send(result);
+  
+
+});
+
+router.get("/:id/comments", async(req, res) => {
+  const result = await movieData.getAllComments(req.params.id)
+  res.status(200).send(result)
+})
+
 // curl -X POST -H "Content-Type: application/json" -d '{"title":"Llamas From Space", "plot":"Aliens..."}' http://localhost:5000/movies
 router.post("/", async (req, res, next) => {
   let resultStatus;
@@ -44,6 +63,11 @@ router.post("/", async (req, res, next) => {
 
   res.status(resultStatus).send(result);
 });
+
+router.post("/:id/comments", async(req, res) => {
+  const result = await movieData.createComment(req.params.id, req.body)
+  res.status(200).send(result)
+})
 
 // curl -X PUT -H "Content-Type: application/json" -d '{"plot":"Sharks..."}' http://localhost:5000/movies/573a13a3f29313caabd0e77b
 router.put("/:id", async (req, res, next) => {
@@ -71,5 +95,10 @@ router.delete("/:id", async (req, res, next) => {
 
   res.status(resultStatus).send(result);
 });
+
+router.delete("/:movieId/comments/:commentId", async(req, res) => {
+  const result = await movieData.deleteCommentById(req.params.id)
+  res.status(200).send(result)
+})
 
 module.exports = router;

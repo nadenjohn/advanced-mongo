@@ -2,12 +2,15 @@ const { MongoClient } = require("mongodb");
 const ObjectId = require('mongodb').ObjectId;
 
 const uri =
-  "YOUR CONNECTION STRING HERE";
+  "mongodb+srv://jnaden:Or05Kila@cluster0.gyrolbu.mongodb.net/?retryWrites=true&w=majority";
 
 const client = new MongoClient(uri);
 
 const databaseName = 'sample_mflix';
-const collName = 'movies'
+const collName = 'movies';
+const commentsCollName = 'comments';
+
+
 
 module.exports = {}
 
@@ -22,6 +25,16 @@ module.exports.getAll = async () => {
   return movieCursor.toArray();
 }
 
+module.exports.getAllComments = async (movieId) =>{
+  const database = client.db(databaseName);
+  const comments = database.collection(commentsCollName);
+  const query = {movie_id: ObjectId(movieId)}
+
+  let commentCursor = await comments.find(query)
+
+  return commentCursor.toArray();
+}
+
 // https://www.mongodb.com/docs/drivers/node/current/usage-examples/findOne/
 module.exports.getById = async (movieId) => {
   const database = client.db(databaseName);
@@ -30,6 +43,15 @@ module.exports.getById = async (movieId) => {
   let movie = await movies.findOne(query);
 
   return movie;
+}
+
+module.exports.getCommentById = async(commentId) => {
+  const database = client.db(databaseName);
+  const comments = database.collection(commentsCollName);
+  const query = {_id: ObjectId(commentId)};
+  let comment = await comments.findOne(query);
+
+  return comment;
 }
 
 module.exports.getByTitle = async (title) => {
@@ -75,6 +97,22 @@ module.exports.create = async (newObj) => {
   }
 }
 
+module.exports.createComments = async (movieId, newObj) => {
+  const database = client.db(databaseName);
+  const comments = database.collection(commentsCollName);
+
+  const goodObj = {...newObj, movie_id: ObjectId(movieId), date: new Date()}
+
+  const result = await comments.insertOne(goodObj);
+
+  if(result.acknowledged){
+    return { newObjectId: result.insertedId, message: `Item created! ID: ${result.insertedId}` }
+  } else {
+    return {error: "Something went wrong. Please try again."}
+  }
+}
+
+
 // https://www.mongodb.com/docs/drivers/node/current/fundamentals/crud/write-operations/change-a-document/
 module.exports.updateById = async (movieId, newObj) => {
   const database = client.db(databaseName);
@@ -108,4 +146,9 @@ module.exports.deleteById = async (movieId) => {
   };
 
   return {message: `Deleted ${result.deletedCount} movie.`};
+}
+
+module.exports.deleteCommentById = async (id) =>{
+
+return {}
 }
