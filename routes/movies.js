@@ -45,9 +45,15 @@ router.get("/:movieId/comments/:commentId", async (req, res, next) => {
 
 });
 
-router.get("/:id/comments", async(req, res) => {
+router.get("/:id/comments", async (req, res) => {
+  let resultStatus;
   const result = await movieData.getAllComments(req.params.id)
-  res.status(200).send(result)
+  if(result.error){
+    resultStatus = 404;
+  } else {
+    resultStatus = 200;
+  }
+  res.status(resultStatus).send(result);
 })
 
 // curl -X POST -H "Content-Type: application/json" -d '{"title":"Llamas From Space", "plot":"Aliens..."}' http://localhost:5000/movies
@@ -83,8 +89,21 @@ router.put("/:id", async (req, res, next) => {
   res.status(resultStatus).send(result);
 });
 
+router.put("/:movieId/comments/:commentId", async (req, res, next) =>{
+  let resultStatus;
+  const result = await movieData.updateCommentById(req.params.commentId, req.body)
+
+  if (result.error){
+    resultStatus = 400;
+  } else {
+    resultStatus = 200;
+  }
+  res.status(resultStatus).send(result);
+})
+
 // curl -X DELETE http://localhost:5000/movies/573a1390f29313caabcd4135
 router.delete("/:id", async (req, res, next) => {
+  let resultStatus;
   const result = await movieData.deleteById(req.params.id);
 
   if(result.error){
@@ -97,8 +116,15 @@ router.delete("/:id", async (req, res, next) => {
 });
 
 router.delete("/:movieId/comments/:commentId", async(req, res) => {
-  const result = await movieData.deleteCommentById(req.params.id)
-  res.status(200).send(result)
-})
+  let resultStatus;
+  const result = await movieData.deleteCommentById(req.params.commentId)
+  if(result.error){
+    resultStatus = 400;
+  } else {
+    resultStatus = 200;
+  }
+
+  res.status(resultStatus).send(result);
+});
 
 module.exports = router;

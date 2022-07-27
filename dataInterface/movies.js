@@ -28,11 +28,12 @@ module.exports.getAll = async () => {
 module.exports.getAllComments = async (movieId) =>{
   const database = client.db(databaseName);
   const comments = database.collection(commentsCollName);
-  const query = {movie_id: ObjectId(movieId)}
+  const query = {_id: ObjectId(movieId)}
 
   let commentCursor = await comments.find(query)
 
-  return commentCursor.toArray();
+    return commentCursor.toArray()
+  
 }
 
 // https://www.mongodb.com/docs/drivers/node/current/usage-examples/findOne/
@@ -133,6 +134,25 @@ module.exports.updateById = async (movieId, newObj) => {
   return updatedMovie;
 }
 
+module.exports.updateCommentById = async (commentId, newObj) => {
+  const database = client.db(databaseName);
+  const comments = database.collection(commentsCollName);
+
+  const updateDoc = { 
+    $set: {"name" : newObj.name, "email": newObj.email, "text" : newObj.text} 
+  }
+  const filter = { _id: ObjectId(commentId) };
+  console.log(filter)
+  console.log(updateDoc)
+  const result = await comments.updateOne(filter, updateDoc);
+  if (result.modifiedCount > 0) {
+  return {message: `UPDATED ${result.modifiedCount} comments`}
+} else {
+  return {error: `Something went wrong. ${result.modifiedCount} comments were deleted. Please try again.`}
+}}
+
+
+
 // https://www.mongodb.com/docs/drivers/node/current/fundamentals/crud/write-operations/delete/
 module.exports.deleteById = async (movieId) => {
   const database = client.db(databaseName);
@@ -148,7 +168,17 @@ module.exports.deleteById = async (movieId) => {
   return {message: `Deleted ${result.deletedCount} movie.`};
 }
 
-module.exports.deleteCommentById = async (id) =>{
+module.exports.deleteCommentById = async (commentId) => {
+  const database = client.db(databaseName);
+  const comments = database.collection(commentsCollName);
 
-return {}
+  const deletionRules = {_id:ObjectId(commentId)}
+  const result = await comments.deleteOne(deletionRules);
+
+  if(result.deletedCount != 1){
+    return {error: `Something went wrong. ${result.deletedCount} comments were deleted. Please try again.`}
+  };
+
+  return {message: `Deleted ${result.deletedCount} comment.`};
 }
+
