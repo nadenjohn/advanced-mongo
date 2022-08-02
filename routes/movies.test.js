@@ -82,7 +82,8 @@ describe("/movies routes", () => {
 
   describe("PUT /:id", () =>{
     it("should return the updated movie on success", async () => {
-      expect(false).toEqual(true);
+      moviedData.updateById.mockResolvedValue({title: "title"})
+      expect(res.statusCode).toEqual(200);
     });
     it("should return error if movie fails to update", async () => {
       expect(false).toEqual(true);
@@ -112,11 +113,11 @@ describe("/movies routes", () => {
       //check if result is Array
     });
     it("should return an error message on error", async () => {
-      movieData.getAll.mockResolvedValue({error: "not deleted"});
+      movieData.deleteCommentById.mockResolvedValue({error: "not deleted"});
 
       const res = await request(server).delete("/:movie_id/comments/:id")
 
-      expect(res.statusCode).toEqual(400);
+      expect(res.statusCode).toEqual(404);
       expect(res.body.error).toBeDefined();
   });
 });

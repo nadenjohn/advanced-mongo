@@ -28,7 +28,7 @@ module.exports.getAll = async () => {
 module.exports.getAllComments = async (movieId) =>{
   const database = client.db(databaseName);
   const comments = database.collection(commentsCollName);
-  const query = {_id: ObjectId(movieId)}
+  const query = {movie_id: ObjectId(movieId)}
 
   let commentCursor = await comments.find(query)
 
